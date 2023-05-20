@@ -103,17 +103,10 @@ export async function task(providerList) {
     await payments.unsubscribe();
 
     payments.removeEventListener(PaymentEventType, processPayment);
-    return `Task executed successfully at provider = ${agreement.provider.id}
-     with name = ${selectedProvider.name}
-      and spent = ${selectedProvider.amount}
-       with time = ${selectedProvider.time}`
-
+    
   }, 10000);
 
-  return `Task executed successfully at provider = ${agreement.provider.id}
-  with name = ${selectedProvider.name}
-   and spent = ${selectedProvider.amount}
-    with time = ${selectedProvider.time}`
 
+  return `Task executed successfully at provider = ${agreement.provider.id}`
 }
 

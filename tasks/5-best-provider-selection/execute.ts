@@ -6,8 +6,6 @@ const arrayOfProviders = JSON.parse(jsonString);
 let max = 100;
 (async () => {
 
-
-
    for(let i = 0; i<= max; i++){
 
       let res = await task(arrayOfProviders.slice(0, 3));
@@ -15,7 +13,7 @@ let max = 100;
       // Exit the loop conditionally if necessary
       if (res !== '0') {
          console.log(res)
-         process.exit(1)
+         break;
       }
       else if(res === '0'){
          console.log("Can't find desired provider, retrying",i);
