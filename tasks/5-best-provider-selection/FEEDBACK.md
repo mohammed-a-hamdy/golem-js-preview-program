@@ -10,7 +10,7 @@ Please fill out the following form to provide your feedback and estimated comple
 ### Estimated completion time:
 | Task Step                     | Completion Time (in minutes) |
 |-------------------------------|------------------------------|
-| Create a `harvest.js` script  |                              |
+| Create a `harvest.js` script  |            180               |
 | Create an `execute.js` script |                              |
 
 ### Feedback:
@@ -18,7 +18,7 @@ Please provide any feedback you have regarding each task step below:
 
 #### Step 1: Create a `harvest.js` script
 Creating my first executor script was a challenging task. The initialization process was straightforward, thanks to the excellent guide provided in the documentation. However, I encountered difficulties when it came to utilizing the API reference for executing more trivial tasks. For instance:
-1. Understanding how to interpret results and retrieve a list of providers and associated costs was not clearly explained. I found it challenging to determine which objects should be used for this purpose.
+1. Understanding how to interpret results and retrieve a list of providers and associated costs was not clearly explained or aviliable for that matter on Task High level API. I found it challenging to determine which objects should be used for this purpose.
 2. I also struggled with finding a way to prevent a single provider from taking multiple tasks. Unfortunately, there was no option available to assign only one task per provider.
 
 
@@ -32,5 +32,6 @@ The website, https://preview.golem.network/, is truly impressive, encompassing a
 ### Suggestions for Improvement
 The API documentation provided at https://docs.golem.network/creators/javascript/docs/ is currently at an early stage and requires further clarification. Unfortunately, a significant portion of the API documents are not accessible, leading to '404 - Not found' errors. This weak and disorganized referencing makes it challenging for users to navigate through the documentation and accomplish even simple tasks. To improve the usability, it would be beneficial to adopt a modern approach to pathways, such as providing tutorials for each task and comprehensive explanations on how to use various options and functions. This would greatly enhance the user experience and facilitate a more seamless understanding of the API capabilities.
 
+The mid level API documentation is abset and no guidance whatsover is provided
 
 Thank you for your feedback and for contributing to the Golem Network!

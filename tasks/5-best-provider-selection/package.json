@@ -1,5 +1,11 @@
 {
   "type": "module",
+  "scripts": {
+    
+    "harvest": "ts-node harvest.ts",
+    "execute": "ts-node execute.ts"
+
+},
   "dependencies": {
     "commander": "^10.0.1",
     "ts-node": "^10.9.1",
