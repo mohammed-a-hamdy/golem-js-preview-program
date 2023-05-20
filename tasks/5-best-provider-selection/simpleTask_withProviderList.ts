@@ -36,16 +36,27 @@ export async function task(providerList) {
   const account = accounts.find((account) => account?.platform.indexOf("erc20") !== -1);
   if (!account) throw new Error("There is no available account");
   const allocation = await Allocation.create({ account });
-  const demand = await Demand.create(taskPackage, [allocation], { logger });
+  const demand = await Demand.create(taskPackage, [allocation], { maxOfferEvents:100,logger });
   const offer: Proposal = await new Promise((res) =>
     demand.addEventListener(DemandEventType, async (event) => {
       const proposalEvent = event as DemandEvent;
       if (proposalEvent.proposal.isInitial())
-        await proposalEvent.proposal.respond(account.platform).catch((e) => logger.error(e));
+        await proposalEvent.proposal.respond(account.platform)
+          .catch((e) => logger.error(e));
       else if (proposalEvent.proposal.isDraft()) res(proposalEvent.proposal);
+
+     
     })
   );
-  const agreement = await Agreement.create(offer.id, { logger });
+  const providerExists = providerList.some(prov => prov.id === offer.issuerId);
+  if (!providerExists) {
+    console.log('Found this provider instead,',offer.issuerId)
+    
+    return '0';
+  }
+  else {
+    console.log('Found a top 3 provider,', offer.issuerId)
+  }
   const payments = await Payments.create({ logger });
   const processPayment = (event) => {
     if (event instanceof InvoiceEvent && event.invoice.agreementId == agreement.id)
@@ -63,22 +74,15 @@ export async function task(providerList) {
     if (event instanceof DebitNoteEvent)
       event.debitNote.accept(event.debitNote.totalAmountDue, allocation.id).catch((e) => logger.warn(e));
   };
+
+
   payments.addEventListener(PaymentEventType, processPayment);
-
-
-  const providerExists = providerList.some(prov => prov.id === offer.issuerId);
-  if (!providerExists) {
-    return 0;
-  }
-  else {
-    console.log('FOUND IT,', offer.issuerId)
-  }
-
+  const agreement = await Agreement.create(offer.id, { logger });
   await agreement.confirm();
   const activity = await Activity.create(agreement.id, { logger, activityExecuteTimeout: 120_000 });
   const script = await Script.create([new Deploy(),
   new Start(),
-  new Run(`node -e "const start = Date.now(); while (Date.now() - start < 5000) { /* Time-consuming task */ } console.log('Time consumed:', Date.now() - start, 'ms');"`)]);
+  new Run(`node -e "const start = Date.now(); while (Date.now() - start < 500) { /* Time-consuming task */ } console.log('Time consumed:', Date.now() - start, 'ms');"`)]);
 
   const exeScript = script.getExeScriptRequest();
   const startTimestamp = new Date().toISOString();
@@ -91,7 +95,9 @@ export async function task(providerList) {
   setTimeout(async () => {
     await allocation.release();
     await payments.unsubscribe();
+
     payments.removeEventListener(PaymentEventType, processPayment);
+    return `Task executed successfully at provider = ${agreement.provider.id}`
 
   }, 10000);
 

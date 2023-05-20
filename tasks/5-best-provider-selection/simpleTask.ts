@@ -74,7 +74,7 @@ export async function task() {
   const activity = await Activity.create(agreement.id, { logger, activityExecuteTimeout: 120_000 });
   const script = await Script.create([new Deploy(),
   new Start(),
-  new Run(`node -e "const start = Date.now(); while (Date.now() - start < 500) { /* Time-consuming task */ } console.log('Time consumed:', Date.now() - start, 'ms');"`)]);
+  new Run(`node -e "const start = Date.now(); while (Date.now() - start < 100) { /* Time-consuming task */ } console.log('Time consumed:', Date.now() - start, 'ms');"`)]);
 
   const exeScript = script.getExeScriptRequest();
   const startTimestamp = new Date().toISOString();

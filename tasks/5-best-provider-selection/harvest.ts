@@ -1,3 +1,4 @@
+process.env['YAGNA_APPKEY'] = 'd1684ca3106340e689b1f9e38613ceae';
 import { task } from "./simpleTask";
 import fs from 'fs';
 

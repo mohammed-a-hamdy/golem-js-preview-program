@@ -11,7 +11,7 @@ Please fill out the following form to provide your feedback and estimated comple
 | Task Step                     | Completion Time (in minutes) |
 |-------------------------------|------------------------------|
 | Create a `harvest.js` script  |            180               |
-| Create an `execute.js` script |            100               |
+| Create an `execute.js` script |            240               |
 
 ### Feedback:
 Please provide any feedback you have regarding each task step below:
