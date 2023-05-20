@@ -42,7 +42,7 @@ export async function task(providerList) {
       const proposalEvent = event as DemandEvent;
       if (proposalEvent.proposal.isInitial())
         await proposalEvent.proposal.respond(account.platform)
-          .catch((e) => logger.error(e));
+          .catch((e) => {});
       else if (proposalEvent.proposal.isDraft()) res(proposalEvent.proposal);
 
      

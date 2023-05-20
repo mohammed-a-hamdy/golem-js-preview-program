@@ -3,7 +3,7 @@ import fs from 'fs';
 import { task } from "./simpleTask_withProviderList";
 const jsonString = fs.readFileSync('topProviders.json', 'utf-8');
 const arrayOfProviders = JSON.parse(jsonString);
-let max = 10;
+let max = 100;
 (async () => {
 
 
