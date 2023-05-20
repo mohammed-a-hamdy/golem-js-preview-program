@@ -41,7 +41,7 @@ export async function task() {
     demand.addEventListener(DemandEventType, async (event) => {
       const proposalEvent = event as DemandEvent;
       if (proposalEvent.proposal.isInitial())
-        await proposalEvent.proposal.respond(account.platform).catch((e) => logger.error(e));
+        await proposalEvent.proposal.respond(account.platform).catch((e) => {});
       else if (proposalEvent.proposal.isDraft()) res(proposalEvent.proposal);
     })
   );
