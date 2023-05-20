@@ -1,7 +1,7 @@
 import { task } from "./simpleTask";
 import fs from 'fs';
 
-let listOfProviders = [{ id: '', name: '', amount: '' }];
+let listOfProviders = [{ id: '', name: '', amount: '',time:0 }];
 const tasks: Promise<any>[] = [];
 (async () => {
   async function runTaskMultipleTimes() {
@@ -16,7 +16,7 @@ const tasks: Promise<any>[] = [];
     try {
       await Promise.all(tasks);
       console.log("All tasks completed successfully");
-      listOfProviders = listOfProviders.sort((a, b) => parseFloat(a.amount) - parseFloat(b.amount)).filter((provider)=>provider.id !== '');
+      listOfProviders = listOfProviders.sort((a, b) => parseFloat(a.amount) - parseFloat(b.amount)).sort((a, b) => a.time - b.time).filter((provider)=>provider.id !== '');
       console.log("List of providers:", listOfProviders);
       await saveTopProviders(listOfProviders);
     } catch (error) {

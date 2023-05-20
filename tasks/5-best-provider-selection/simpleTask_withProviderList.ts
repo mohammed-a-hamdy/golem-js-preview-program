@@ -1,4 +1,4 @@
-process.env['YAGNA_APPKEY'] = 'd1684ca3106340e689b1f9e38613ceae';
+
 import {
   Package,
   Accounts,
@@ -27,6 +27,7 @@ export async function task(providerList) {
     'id': '',
     'name': '',
     'amount': '',
+    'time': 0
   }
   const logger = new ConsoleLogger();
 
@@ -44,14 +45,20 @@ export async function task(providerList) {
       else if (proposalEvent.proposal.isDraft()) res(proposalEvent.proposal);
     })
   );
+  const agreement = await Agreement.create(offer.id, { logger });
   const payments = await Payments.create({ logger });
   const processPayment = (event) => {
     if (event instanceof InvoiceEvent && event.invoice.agreementId == agreement.id)
       event.invoice.accept(event.invoice.amount, allocation.id)
         .then(() => {
+          const timestamp1: Date = new Date(startTimestamp);
+          const timestamp2: Date = new Date(event.invoice.timestamp);
+          const differenceInMilliseconds: number = Math.abs(timestamp2.getTime() - timestamp1.getTime());
+          const differenceInSeconds: number = differenceInMilliseconds / 1000;
           selectedProvider.id = agreement.provider.id;
           selectedProvider.name = agreement.provider.name;
           selectedProvider.amount = event.invoice.amount;
+          selectedProvider.time = differenceInSeconds;
         }).catch((e) => logger.warn(e));
     if (event instanceof DebitNoteEvent)
       event.debitNote.accept(event.debitNote.totalAmountDue, allocation.id).catch((e) => logger.warn(e));
@@ -61,26 +68,22 @@ export async function task(providerList) {
 
   const providerExists = providerList.some(prov => prov.id === offer.issuerId);
   if (!providerExists) {
-    await task(providerList);
-    return;
+    return 0;
   }
-  else{
-    console.log('FOUND IT,',offer.issuerId)
+  else {
+    console.log('FOUND IT,', offer.issuerId)
   }
-
-  const agreement = await Agreement.create(offer.id, { logger });
 
   await agreement.confirm();
   const activity = await Activity.create(agreement.id, { logger, activityExecuteTimeout: 120_000 });
   const script = await Script.create([new Deploy(),
-    new Start(),
-    new Run(`node -e "const start = Date.now(); while (Date.now() - start < 500000) { /* Time-consuming task */ } console.log('Time consumed:', Date.now() - start, 'ms');"`)]);
+  new Start(),
+  new Run(`node -e "const start = Date.now(); while (Date.now() - start < 5000) { /* Time-consuming task */ } console.log('Time consumed:', Date.now() - start, 'ms');"`)]);
 
   const exeScript = script.getExeScriptRequest();
-  const streamResult = await activity.execute(exeScript);
-  const results: Result[] = [];
-  for await (const result of streamResult) results.push(result);
-  console.log(results[2].stdout);
+  const startTimestamp = new Date().toISOString();
+  await activity.execute(exeScript);
+
   await activity.stop();
   await agreement.terminate();
   await demand.unsubscribe();
@@ -92,9 +95,7 @@ export async function task(providerList) {
 
   }, 10000);
 
-  return selectedProvider;
-
-
+  return `Task executed successfully at provider = ${agreement.provider.id}`
 
 }
 

@@ -1,4 +1,4 @@
-process.env['YAGNA_APPKEY'] = 'd1684ca3106340e689b1f9e38613ceae';
+
 import {
   Package,
   Accounts,
@@ -9,7 +9,6 @@ import {
   Proposal,
   Agreement,
   Activity,
-  Result,
   Deploy,
   Run,
   Script,
@@ -19,15 +18,16 @@ import {
   PaymentEventType,
   InvoiceEvent,
   DebitNoteEvent,
+  
 
 } from "yajsapi";
-import { UploadFile } from "yajsapi/dist/script";
-import { GftpStorageProvider } from "yajsapi/dist/storage";
+
 export async function task() {
   let selectedProvider = {
     'id': '',
     'name': '',
     'amount': '',
+    'time': 0
   }
   const logger = new ConsoleLogger();
 
@@ -50,12 +50,20 @@ export async function task() {
     if (event instanceof InvoiceEvent && event.invoice.agreementId == agreement.id)
       event.invoice.accept(event.invoice.amount, allocation.id)
         .then(() => {
+          console.log('Start Timestamp: ',startTimestamp);
+          console.log('Invoice Timestamp : ', event.invoice.timestamp);
+          const timestamp1: Date = new Date(startTimestamp);
+          const timestamp2: Date = new Date(event.invoice.timestamp);
+          const differenceInMilliseconds: number = Math.abs(timestamp2.getTime() - timestamp1.getTime());
+          const differenceInSeconds: number = differenceInMilliseconds / 1000;
+          console.log('Consumption time in S : ',differenceInSeconds);
           console.log('provider', agreement.provider);
           console.log('Accepted amount : ', event.invoice.amount);
           console.log('Accepted provider : ', event.invoice.providerId);
           selectedProvider.id = agreement.provider.id;
           selectedProvider.name = agreement.provider.name;
           selectedProvider.amount = event.invoice.amount;
+          selectedProvider.time = differenceInSeconds;
         }).catch((e) => logger.warn(e));
     if (event instanceof DebitNoteEvent)
       event.debitNote.accept(event.debitNote.totalAmountDue, allocation.id).catch((e) => logger.warn(e));
@@ -65,14 +73,12 @@ export async function task() {
   await agreement.confirm();
   const activity = await Activity.create(agreement.id, { logger, activityExecuteTimeout: 120_000 });
   const script = await Script.create([new Deploy(),
-                                      new Start(),
-                                      new Run(`node -e "const start = Date.now(); while (Date.now() - start < 5000) { /* Time-consuming task */ } console.log('Time consumed:', Date.now() - start, 'ms');"`)]);
+  new Start(),
+  new Run(`node -e "const start = Date.now(); while (Date.now() - start < 500) { /* Time-consuming task */ } console.log('Time consumed:', Date.now() - start, 'ms');"`)]);
 
   const exeScript = script.getExeScriptRequest();
-  const streamResult = await activity.execute(exeScript);
-  const results: Result[] = [];
-  for await (const result of streamResult) results.push(result);
-  console.log(results[2].stdout);
+  const startTimestamp = new Date().toISOString();
+  await activity.execute(exeScript);
   await activity.stop();
   await agreement.terminate();
   await demand.unsubscribe();
