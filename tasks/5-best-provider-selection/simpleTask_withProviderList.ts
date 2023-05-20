@@ -62,10 +62,16 @@ export async function task(providerList) {
     if (event instanceof InvoiceEvent && event.invoice.agreementId == agreement.id)
       event.invoice.accept(event.invoice.amount, allocation.id)
         .then(() => {
+          console.log('Start Timestamp: ',startTimestamp);
+          console.log('Invoice Timestamp : ', event.invoice.timestamp);
           const timestamp1: Date = new Date(startTimestamp);
           const timestamp2: Date = new Date(event.invoice.timestamp);
           const differenceInMilliseconds: number = Math.abs(timestamp2.getTime() - timestamp1.getTime());
           const differenceInSeconds: number = differenceInMilliseconds / 1000;
+          console.log('Consumption time in S : ',differenceInSeconds);
+          console.log('provider', agreement.provider);
+          console.log('Accepted amount : ', event.invoice.amount);
+          console.log('Accepted provider : ', event.invoice.providerId);
           selectedProvider.id = agreement.provider.id;
           selectedProvider.name = agreement.provider.name;
           selectedProvider.amount = event.invoice.amount;
@@ -104,7 +110,10 @@ export async function task(providerList) {
 
   }, 10000);
 
-  return `Task executed successfully at provider = ${agreement.provider.id}`
+  return `Task executed successfully at provider = ${agreement.provider.id}
+  with name = ${selectedProvider.name}
+   and spent = ${selectedProvider.amount}
+    with time = ${selectedProvider.time}`
 
 }
 
