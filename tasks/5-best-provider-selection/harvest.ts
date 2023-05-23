@@ -35,6 +35,7 @@ const saveTopProviders = async (lisOfProviders) => {
   const json = JSON.stringify(lisOfProviders, null, 2);
 
 fs.writeFileSync('topProviders.json', json);
-
 console.log('Top providers saved as JSON file.');
+process.exit(1)
+
 }

@@ -106,7 +106,7 @@ export async function task(providerList) {
     
   }, 10000);
 
-
+  return  selectedProvider;
   return `Task executed successfully at provider = ${agreement.provider.id}`
 }
 

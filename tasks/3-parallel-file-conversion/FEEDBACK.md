@@ -10,8 +10,8 @@ Please fill out the following form to provide your feedback and estimated comple
 ### Estimated completion time:
 | Task Step                                                                           | Completion Time (in minutes) |
 |-------------------------------------------------------------------------------------|------------------------------|
-| Convert the docker image to a GVMI image and publish it to receive an image hash    |                              |
-| Schedule a task on Golem with image conversion from Node.js context                 |                              |
+| Convert the docker image to a GVMI image and publish it to receive an image hash    |              -               |
+| Schedule a task on Golem with image conversion from Node.js context                 |              50              |
 | [Challenge] Schedule a task on Golem with image conversion from the browser context |                              |
 
 ### Feedback:
@@ -20,6 +20,7 @@ Please provide any feedback you have regarding each task step below:
 #### Step 1: Convert the docker image to a GVMI image and publish it to receive an image hash
 
 [ENTER YOUR FEEDBACK HERE]
+It was quite challenging using the gvmkit-build tool as there was alot of unepxetced errors raised dispute following the officioal step by step online tutorial
 
 #### Step 2: Schedule a task on Golem with image conversion from Node.js context 
 

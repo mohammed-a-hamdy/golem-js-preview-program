@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Task 3: 3-parallel-file-conversion </title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+   
+</head>
+
+<body>
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <div class="container">
+                <h1 class="title">Schedule a task on Golem with image conversion from the browser context</h1>
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-half">
+                    <h3 class="subtitle">Credentials</h3>
+                    <div class="field">
+                        <label class="label" for="YAGNA_APPKEY">YAGNA_APPKEY:</label>
+                        <div class="control">
+                            <input id="YAGNA_APPKEY" class="input" type="text" value="d1684ca3106340e689b1f9e38613ceae">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="YAGNA_API_BASEPATH">YAGNA_API_BASEURL:</label>
+                        <div class="control">
+                            <input id="YAGNA_API_BASEPATH" class="input" type="text" value="http://127.0.0.1:7465">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="MEME_TEXT">base64 Text:</label>
+                        <div class="control">
+                            <input id="MEME_TEXT" class="input" type="text" value="XXXXX">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="MEME_IMG">Image:</label>
+                        <div class="control">
+                            <input id="MEME_IMG" class="input" type="file" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="ENCODED_MEME_IMG">base64 Image:</label>
+                        <div class="control">
+                            <textarea id="ENCODED_MEME_IMG" class="textarea" readonly rows="3"></textarea>
+                        </div>
+                    </div>
+                    <h3 class="subtitle">Actions</h3>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button class="button is-primary" onclick="run()">Generate base64</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-half border-left">
+                    <div class="logs console">
+                        <h3 class="subtitle">Logs</h3>
+                        <ul id="logs"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+   
+<script crossorigin src="https://unpkg.com/yajsapi@0.7.0-alpha.0/dist/yajsapi.min.js"></script>
+
+    <script>
+        let activity;
+        const encodedImg = document.getElementById("ENCODED_MEME_IMG");
+        const imgInput = document.getElementById("MEME_IMG");
+        const textInput = document.getElementById("MEME_TEXT");
+        const imgResult = document.getElementById("RESULT_MEME");
+
+        async function run() {
+            const apiKey = document.getElementById('YAGNA_APPKEY').value;
+            const basePath = document.getElementById('YAGNA_API_BASEPATH').value;
+            const chunkedImg = chunkString(encodedImg.value, 64000);
+
+            const executor = await yajsapi.TaskExecutor.create({
+                yagnaOptions: { apiKey, basePath },
+                package: "6539a63fecfb4ce98bc838ab2de71c6f4d36e1ee5945fbd8f1165c48",
+                logger
+            });
+
+            const batchResults = await executor
+                .run(async function(ctx) {
+                    const batch = ctx.beginBatch();
+                    for (const chunk of chunkedImg) {
+                        batch.run('echo "' + chunk + '" >> /golem/work/input_img.txt');
+                    }
+                    batch.run('/usr/bin/python3 /golem/work/task.py /golem/work/input_img.txt 130,180,"' + textInput.value + '"');
+                    return batch.end();
+                })
+                .catch(function(e) {
+                    logger.error(e);
+                });
+
+            await executor.end();
+            const result = batchResults.pop();
+            setResponse(result.stdout);
+        }
+
+        imgInput.addEventListener("change", function(e) {
+            uploadImage(e);
+        });
+
+        function convertBase64(file) {
+            return new Promise(function(resolve, reject) {
+                const fileReader = new FileReader();
+                fileReader.readAsDataURL(file);
+
+                fileReader.onload = function() {
+                    resolve(fileReader.result);
+                };
+
+                fileReader.onerror = function(error) {
+                    reject(error);
+                };
+            });
+        }
+
+        async function uploadImage(event) {
+            const file = event.target.files[0];
+            encodedImg.innerText = await convertBase64(file);
+        }
+
+        function appendLog(msg) {
+            const logs_el = document.getElementById('logs');
+            const li = document.createElement('li');
+            li.appendChild(document.createTextNode(msg));
+            logs_el.appendChild(li);
+        }
+
+        function setResponse(result) {
+            const data = result.split(' ');
+            imgResult.src = 'data:image/png;base64,' + data[2];
+        }
+
+        const logger = {
+            log: function(msg) {
+                appendLog('[' + new Date().toISOString() + '] ' + msg);
+            },
+            warn: function(msg) {
+                appendLog('[' + new Date().toISOString() + '] [warn] ' + msg);
+            },
+            debug: function(msg) {
+                appendLog('[' + new Date().toISOString() + '] [debug] ' + msg);
+            },
+            error: function(msg) {
+                appendLog('[' + new Date().toISOString() + '] [error] ' + msg);
+            },
+            info: function(msg) {
+                appendLog('[' + new Date().toISOString() + '] [info] ' + msg);
+            },
+            table: function(msg) {
+                appendLog(JSON.stringify(msg, null, '\t'));
+            }
+        };
+
+        function chunkString(str, length) {
+            return str.match(new RegExp('.{1,' + length + '}', 'g'));
+        }
+</script>
+
+</html>

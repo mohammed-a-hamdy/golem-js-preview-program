@@ -1,0 +1,14 @@
+{
+  "type": "module",
+  "scripts": {
+    "run": ""
+  },
+  "dependencies": {
+    "commander": "^10.0.1",
+    "dotenv": "^16.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4",
+    "url": "^0.11.0",
+    "yajsapi": "^0.7.0-alpha.0"
+  }
+}
